@@ -127,11 +127,7 @@ class GTestBreakOnFailureUnitTest(gtest_test_utils.TestCase):
     if flag:
       command.append(flag)
 
-    if expect_seg_fault:
-      should_or_not = 'should'
-    else:
-      should_or_not = 'should not'
-
+    should_or_not = 'should' if expect_seg_fault else 'should not'
     has_seg_fault = Run(command)
 
     SetEnvVar(BREAK_ON_FAILURE_ENV_VAR, None)

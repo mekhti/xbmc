@@ -87,10 +87,7 @@ def RunWithFlag(flag):
     flag: the command-line flag to pass to gtest_help_test_, or None.
   """
 
-  if flag is None:
-    command = [PROGRAM_PATH]
-  else:
-    command = [PROGRAM_PATH, flag]
+  command = [PROGRAM_PATH] if flag is None else [PROGRAM_PATH, flag]
   child = gtest_test_utils.Subprocess(command)
   return child.exit_code, child.output
 

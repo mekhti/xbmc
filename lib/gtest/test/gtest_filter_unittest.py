@@ -315,7 +315,7 @@ class GTestFilterUnitTest(gtest_test_utils.TestCase):
     if CAN_TEST_EMPTY_FILTER or gtest_filter != '':
       SetEnvVar(FILTER_ENV_VAR, gtest_filter)
       partition = []
-      for i in range(0, total_shards):
+      for i in range(total_shards):
         (tests_run, exit_code) = RunWithSharding(total_shards, i, args)
         if check_exit_0:
           self.assertEqual(0, exit_code)

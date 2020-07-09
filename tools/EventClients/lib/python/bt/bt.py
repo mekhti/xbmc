@@ -47,18 +47,10 @@ def bt_create_rfcomm_socket():
     return sock
 
 def bt_discover_devices():
-    if BLUEZ:
-        nearby = bluetooth.discover_devices()
-    else:
-        nearby = lightblue.finddevices()
-    return nearby
+    return bluetooth.discover_devices() if BLUEZ else lightblue.finddevices()
 
 def bt_lookup_name(bdaddr):
-    if BLUEZ:
-        bname = bluetooth.lookup_name( bdaddr )
-    else:
-        bname = bdaddr[1]
-    return bname
+    return bluetooth.lookup_name( bdaddr ) if BLUEZ else bdaddr[1]
 
 def bt_lookup_addr(bdaddr):
     if BLUEZ:

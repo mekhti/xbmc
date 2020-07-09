@@ -84,18 +84,19 @@ def _versionchecklinux(packages):
                 return
 
         if handler:
-            if handler.check_upgrade_available(packages[0]):
-                if _upgrademessage(32012, oldversion, True):
-                    if ADDON.getSetting("upgrade_system") == "false":
-                        result = handler.upgrade_package(packages[0])
-                    else:
-                        result = handler.upgrade_system()
-                    if result:
-                        from lib.common import message_upgrade_success, message_restart
-                        message_upgrade_success()
-                        message_restart()
-                    else:
-                        log("Error during upgrade")
+            if handler.check_upgrade_available(
+                packages[0]
+            ) and _upgrademessage(32012, oldversion, True):
+                if ADDON.getSetting("upgrade_system") == "false":
+                    result = handler.upgrade_package(packages[0])
+                else:
+                    result = handler.upgrade_system()
+                if result:
+                    from lib.common import message_upgrade_success, message_restart
+                    message_upgrade_success()
+                    message_restart()
+                else:
+                    log("Error during upgrade")
         else:
             log("Error: no handler found")
     else:

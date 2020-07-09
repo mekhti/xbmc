@@ -235,116 +235,109 @@ class sixaxis():
 
 
   def process_socket(self, isock):
-    data = isock.recv(50)
-    if data == None:
-      return False
-    return self.process_data(data)
+      data = isock.recv(50)
+      if data is None:
+          return False
+      return self.process_data(data)
 
 
   def process_data(self, data):
-    if len(data) < 3:
-        return False
+      if len(data) < 3:
+          return False
 
-    # make sure this is the correct report
-    if struct.unpack("BBB", data[0:3]) != (0xa1, 0x01, 0x00):
-        return False
+      # make sure this is the correct report
+      if struct.unpack("BBB", data[0:3]) != (0xa1, 0x01, 0x00):
+          return False
 
-    if len(data) >= 48:
-        v1 = struct.unpack("h", data[42:44])
-        v2 = struct.unpack("h", data[44:46])
-        v3 = struct.unpack("h", data[46:48])
-    else:
-        v1 = [0,0]
-        v2 = [0,0]
-        v3 = [0,0]
+      if len(data) >= 48:
+          v1 = struct.unpack("h", data[42:44])
+          v2 = struct.unpack("h", data[44:46])
+          v3 = struct.unpack("h", data[46:48])
+      else:
+          v1 = [0,0]
+          v2 = [0,0]
+          v3 = [0,0]
 
-    if len(data) >= 50:
-        v4 = struct.unpack("h", data[48:50])
-    else:
-        v4 = [0,0]
+      v4 = struct.unpack("h", data[48:50]) if len(data) >= 50 else [0,0]
+      ax = float(v1[0])
+      ay = float(v2[0])
+      az = float(v3[0])
+      rz = float(v4[0])
+      at = math.sqrt(ax*ax + ay**2 + az*az)
 
-    ax = float(v1[0])
-    ay = float(v2[0])
-    az = float(v3[0])
-    rz = float(v4[0])
-    at = math.sqrt(ax*ax + ay*ay + az*az)
+      bflags = struct.unpack("<I", data[3:7])[0]
+      if len(data) > 27:
+          pressure = struct.unpack("BBBBBBBBBBBB", data[15:27])
+      else:
+          pressure = [0,0,0,0,0,0,0,0,0,0,0,0,0]
 
-    bflags = struct.unpack("<I", data[3:7])[0]
-    if len(data) > 27:
-        pressure = struct.unpack("BBBBBBBBBBBB", data[15:27])
-    else:
-        pressure = [0,0,0,0,0,0,0,0,0,0,0,0,0]
+      roll = -math.atan2(ax, math.sqrt(ay**2 + az**2))
+      pitch = math.atan2(ay, math.sqrt(ax**2 + az**2))
 
-    roll  = -math.atan2(ax, math.sqrt(ay*ay + az*az))
-    pitch = math.atan2(ay, math.sqrt(ax*ax + az*az))
+      pitch -= math.radians(20);
 
-    pitch -= math.radians(20);
+      xpos = normalize_angle(roll, math.radians(30))
+      ypos = normalize_angle(pitch, math.radians(30))
 
-    xpos = normalize_angle(roll, math.radians(30))
-    ypos = normalize_angle(pitch, math.radians(30))
-    
 
-    axis = struct.unpack("BBBB", data[7:11])
-    return self.process_input(bflags, pressure, axis, xpos, ypos)
+      axis = struct.unpack("BBBB", data[7:11])
+      return self.process_input(bflags, pressure, axis, xpos, ypos)
 
   def process_input(self, bflags, pressure, axis, xpos, ypos):
 
-    xval = smooth(self.sumx, xpos)
-    yval = smooth(self.sumy, ypos)
+      xval = smooth(self.sumx, xpos)
+      yval = smooth(self.sumy, ypos)
 
-    analog = False
-    for i in range(4):
-        config = axismap_sixaxis[i]
-        self.axis_amount[i] = self.send_singleaxis(axis[i], self.axis_amount[i], config[0], config[1], config[2])
-        if self.axis_amount[i] != 0:
-            analog = True
+      analog = False
+      for i in range(4):
+          config = axismap_sixaxis[i]
+          self.axis_amount[i] = self.send_singleaxis(axis[i], self.axis_amount[i], config[0], config[1], config[2])
+          if self.axis_amount[i] != 0:
+              analog = True
 
-    # send the mouse position to xbmc
-    if self.mouse_enabled == 1:
-        self.xbmc.send_mouse_position(xval, yval)
+      # send the mouse position to xbmc
+      if self.mouse_enabled == 1:
+          self.xbmc.send_mouse_position(xval, yval)
 
-    if (bflags & SX_POWER) == SX_POWER:
-        if self.psdown:
-            if (time.time() - self.psdown) > 5:
+      if (bflags & SX_POWER) == SX_POWER:
+          if self.psdown:
+              if (time.time() - self.psdown) > 5:
 
-                for key in (self.held | self.pressed):
-                    (mapname, action, amount, axis) = keymap_sixaxis[key]
-                    self.xbmc.send_button_state(map=mapname, button=action, amount=0, down=0, axis=axis)
+                  for key in (self.held | self.pressed):
+                      (mapname, action, amount, axis) = keymap_sixaxis[key]
+                      self.xbmc.send_button_state(map=mapname, button=action, amount=0, down=0, axis=axis)
 
-                raise Exception("PS3 Sixaxis powering off, user request")
-        else:
-            self.psdown = time.time()
-    else:
-        if self.psdown:
-            self.mouse_enabled = 1 - self.mouse_enabled
-        self.psdown = 0
+                  raise Exception("PS3 Sixaxis powering off, user request")
+          else:
+              self.psdown = time.time()
+      else:
+          if self.psdown:
+              self.mouse_enabled = 1 - self.mouse_enabled
+          self.psdown = 0
 
-    keys     = set(getkeys(bflags))
-    self.released = (self.pressed | self.held) - keys
-    self.held     = (self.pressed | self.held) - self.released
-    self.pressed  = (keys - self.held) & self.pending
-    self.pending  = (keys - self.held)
+      keys     = set(getkeys(bflags))
+      self.released = (self.pressed | self.held) - keys
+      self.held     = (self.pressed | self.held) - self.released
+      self.pressed  = (keys - self.held) & self.pending
+      self.pending  = (keys - self.held)
 
-    for key in self.released:
-        (mapname, action, amount, axis) = keymap_sixaxis[key]
-        self.xbmc.send_button_state(map=mapname, button=action, amount=0, down=0, axis=axis)
+      for key in self.released:
+          (mapname, action, amount, axis) = keymap_sixaxis[key]
+          self.xbmc.send_button_state(map=mapname, button=action, amount=0, down=0, axis=axis)
 
-    for key in self.held:
-        (mapname, action, amount, axis) = keymap_sixaxis[key]
-        if amount > 0:
-            amount = pressure[amount-1] * 256
-            self.xbmc.send_button_state(map=mapname, button=action, amount=amount, down=1, axis=axis)
+      for key in self.held:
+          (mapname, action, amount, axis) = keymap_sixaxis[key]
+          if amount > 0:
+              amount = pressure[amount-1] * 256
+              self.xbmc.send_button_state(map=mapname, button=action, amount=amount, down=1, axis=axis)
 
-    for key in self.pressed:
-        (mapname, action, amount, axis) = keymap_sixaxis[key]
-        if amount > 0:
-            amount = pressure[amount-1] * 256
-        self.xbmc.send_button_state(map=mapname, button=action, amount=amount, down=1, axis=axis)
+      for key in self.pressed:
+          (mapname, action, amount, axis) = keymap_sixaxis[key]
+          if amount > 0:
+              amount = pressure[amount-1] * 256
+          self.xbmc.send_button_state(map=mapname, button=action, amount=amount, down=1, axis=axis)
 
-    if analog or keys or self.mouse_enabled:
-      return True
-    else:
-      return False
+      return bool(analog or keys or self.mouse_enabled)
 
 
   def send_singleaxis(self, axis, last_amount, mapname, action_min, action_pos):

@@ -37,7 +37,6 @@ def usage():
     print("\t--host=HOST\t\t\tChoose what HOST to connect to (default=localhost)")
     print("\t--port=PORT\t\t\tChoose what PORT to connect to (default=9777)")
     print('\t--action=ACTION\t\t\tSends an action to XBMC, this option can be added multiple times to create a macro')
-    pass
 
 def main():
     try:

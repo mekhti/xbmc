@@ -113,10 +113,7 @@ class StoppableThread ( threading.Thread ):
         return time.time() - self.last_action
 
     def timed_out(self):
-        if (time.time() - self.last_action) > self.timeout:
-            return True
-        else:
-            return False
+        return (time.time() - self.last_action) > self.timeout
 
 
 class PS3SixaxisThread ( StoppableThread ):
@@ -324,8 +321,6 @@ def start_hidd(bdaddr=None, ipaddr="127.0.0.1"):
             watch = SixWatch(hid.get_local_address())
         except Exception as e:
             print("Failed to initialize sixwatch" + str(e))
-            pass
-
     while True:
         if hid.listen():
             (csock, addr) = hid.get_control_socket()
@@ -402,5 +397,4 @@ if __name__=="__main__":
 
             except Exception as e:
                 print(str(e))
-        pass
 

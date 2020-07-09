@@ -248,7 +248,7 @@ class Packet:
         uid  -- unique identification
         """
         self.uid = uid
-        for a in range ( 0, self.num_packets() ):
+        for a in range(self.num_packets()):
             try:
                 sock.sendto(self.get_udp_message(a+1), addr)
             except:
@@ -350,21 +350,18 @@ class PacketBUTTON (Packet):
             code = ord(code)
 
         # assign code only if we don't have a map and button name
-        if not (map_name and button_name):
-            self.code = code
-        else:
+        if (map_name and button_name):
             self.flags |= BT_USE_NAME
             self.code = 0
-        if (amount != None):
-            self.flags |= BT_USE_AMOUNT
-            self.amount = int(amount)
         else:
+            self.code = code
+        if amount is None:
             self.amount = 0
 
-        if down:
-            self.flags |= BT_DOWN
         else:
-            self.flags |= BT_UP
+            self.flags |= BT_USE_AMOUNT
+            self.amount = int(amount)
+        self.flags |= BT_DOWN if down else BT_UP
         if not repeat:
             self.flags |= BT_NO_REPEAT
         if queue:
@@ -590,11 +587,7 @@ class XBMCClient:
                   "printscreen", "minus", "x", etc.
         """
         if axis:
-          if amount == 0:
-            down = 0
-          else:
-            down = 1
-
+            down = 0 if amount == 0 else 1
         packet = PacketBUTTON(map_name=str(map), button_name=str(button), amount=amount, down=down, queue=1, axis=axis)
         return packet.send(self.sock, self.addr, self.uid)
 

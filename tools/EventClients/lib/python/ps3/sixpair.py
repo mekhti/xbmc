@@ -89,25 +89,25 @@ def update_pair(dev, mac):
     set_pair(dev, mac)
 
 if __name__=="__main__":
-    devs = find_sixaxes()
+  devs = find_sixaxes()
 
-    mac = None
-    if len(sys.argv) > 1:
-      try:
-        mac = sys.argv[1].split(':')
-        mac = tuple([int(x, 16) for x in mac])
-        if len(mac) != 6:
-          print("Invalid length of HCI address, should be 6 parts")
-          mac = None
-      except:
-        print("Failed to parse HCI address")
+  mac = None
+  if len(sys.argv) > 1:
+    try:
+      mac = sys.argv[1].split(':')
+      mac = tuple(int(x, 16) for x in mac)
+      if len(mac) != 6:
+        print("Invalid length of HCI address, should be 6 parts")
         mac = None
-    
-    for dev in devs:
-      if mac:
-        update_pair(dev, mac)
-      else:
-        print("Found sixaxis paired to: " + mac_to_string(get_pair(dev)))
+    except:
+      print("Failed to parse HCI address")
+      mac = None
+
+  for dev in devs:
+    if mac:
+      update_pair(dev, mac)
+    else:
+      print("Found sixaxis paired to: " + mac_to_string(get_pair(dev)))
 
 
 

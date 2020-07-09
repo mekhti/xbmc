@@ -75,13 +75,10 @@ def ResolveErrors():
             value = Errors[key]
             if type(value) is str:
                 elements = [x.strip() for x in value.split('-')]
-                if len(elements[0]) == 0:
-                    first = 0
-                else:
-                    first = elements[0]
+                first = 0 if len(elements[0]) == 0 else elements[0]
                 if Errors.has_key(first):
                     first = Errors[first]
-                if not type(first) is str:
+                if type(first) is not str:
                     second = int(elements[1])
                     Errors[key] = first-second
                     keep_going = True

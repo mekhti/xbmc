@@ -21,6 +21,7 @@
 Simple wrapper around Avahi
 """
 
+
 __author__  = "d4rk@xbmc.org"
 __version__ = "0.1"
 
@@ -32,8 +33,6 @@ try:
 except Exception as e:
     print("Zeroconf support disabled. To enable, install the following Python modules:")
     print("    dbus, gobject, avahi")
-    pass
-
 SERVICE_FOUND  = 1
 SERVICE_LOST   = 2
 
@@ -125,12 +124,13 @@ class Browser:
 
 
     def _service_resolved_handler( self, *args ):
-        service = {}
-        service['type']     = str( args[3] )
-        service['name']     = str( args[2] )
-        service['address']  = str( args[7] )
-        service['hostname'] = str( args[5] )
-        service['port']     = int( args[8] )
+        service = {
+            'type': str(args[3]),
+            'name': str(args[2]),
+            'address': str(args[7]),
+            'hostname': str(args[5]),
+            'port': int(args[8]),
+        }
 
         # if the service type has a handler call it
         try:

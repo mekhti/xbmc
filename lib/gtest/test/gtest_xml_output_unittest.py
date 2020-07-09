@@ -31,6 +31,7 @@
 
 """Unit test for the gtest_xml_output module"""
 
+
 __author__ = 'eefacm@gmail.com (Sean Mcafee)'
 
 import datetime
@@ -52,11 +53,7 @@ GTEST_PROGRAM_NAME = "gtest_xml_output_unittest_"
 
 SUPPORTS_STACK_TRACES = False
 
-if SUPPORTS_STACK_TRACES:
-  STACK_TRACE_TEMPLATE = '\nStack trace:\n*'
-else:
-  STACK_TRACE_TEMPLATE = ''
-
+STACK_TRACE_TEMPLATE = '\nStack trace:\n*' if SUPPORTS_STACK_TRACES else ''
 EXPECTED_NON_EMPTY_XML = """<?xml version="1.0" encoding="UTF-8"?>
 <testsuites tests="23" failures="4" disabled="2" errors="0" time="*" timestamp="*" name="AllTests" ad_hoc_property="42">
   <testsuite name="SuccessfulTest" tests="1" failures="0" disabled="0" errors="0" time="*">
@@ -281,8 +278,7 @@ class GTestXMLOutputUnitTest(gtest_xml_test_utils.GTestXMLTestCase):
                         "'%s' exited with code %s, which doesn't match "
                         'the expected exit code %s.'
                         % (command, p.exit_code, expected_exit_code))
-    actual = minidom.parse(xml_path)
-    return actual
+    return minidom.parse(xml_path)
 
   def _TestXmlOutput(self, gtest_prog_name, expected_xml,
                      expected_exit_code, extra_args=None):

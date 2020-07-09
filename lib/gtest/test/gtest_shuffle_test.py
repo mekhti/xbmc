@@ -121,7 +121,7 @@ def GetTestCases(tests):
   test_cases = []
   for test in tests:
     test_case = test.split('.')[0]
-    if not test_case in test_cases:
+    if test_case not in test_cases:
       test_cases.append(test_case)
 
   return test_cases
@@ -316,8 +316,7 @@ class GTestShuffleUnitTest(gtest_test_utils.TestCase):
                                         [ShuffleFlag(), RandomSeedFlag(25)])
     sorted_sharded_tests = tests1 + tests2 + tests3
     sorted_sharded_tests.sort()
-    sorted_active_tests = []
-    sorted_active_tests.extend(ACTIVE_TESTS)
+    sorted_active_tests = list(ACTIVE_TESTS)
     sorted_active_tests.sort()
     self.assertEqual(sorted_active_tests, sorted_sharded_tests)
 
