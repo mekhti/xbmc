@@ -39,10 +39,7 @@ monitor = xbmc.Monitor()
 # Fixes unicode problems
 def string_unicode(text, encoding='utf-8'):
     try:
-        if sys.version_info[0] >= 3:
-            text = str( text )
-        else:
-            text = unicode( text, encoding )
+        text = str( text ) if sys.version_info[0] >= 3 else unicode( text, encoding )
     except:
         pass
     return text
@@ -55,8 +52,7 @@ def normalize_string(text):
     return text
 
 def localise(id):
-    string = normalize_string(ADDON.getLocalizedString(id))
-    return string
+    return normalize_string(ADDON.getLocalizedString(id))
 
 def log(txt):
     if sys.version_info[0] >= 3:

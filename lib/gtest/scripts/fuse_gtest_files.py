@@ -204,7 +204,7 @@ def FuseGTestAllCcToFile(gtest_root, output_file):
           # #included directly.
 
           # There is no need to #include "gtest/gtest.h" more than once.
-          if not GTEST_H_SEED in processed_files:
+          if GTEST_H_SEED not in processed_files:
             processed_files.add(GTEST_H_SEED)
             output_file.write('#include "%s"\n' % (GTEST_H_OUTPUT,))
       else:

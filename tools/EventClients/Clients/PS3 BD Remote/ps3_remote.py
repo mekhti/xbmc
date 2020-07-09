@@ -58,7 +58,7 @@ def get_remote_address(remote, target_name = "BD Remote Control"):
     global xbmc
     target_connected = False
     target_address = None
-    while target_connected is False:
+    while not target_connected:
         xbmc.send_notification("Action Required!",
                                "Hold Start+Enter on your remote.",
                                bticon)
@@ -201,8 +201,8 @@ def main():
     xbmc = XBMCClient("PS3 Bluetooth Remote",
                       icon_file=bticon)
 
-    while loop_forever is True:
-        target_connected = False
+    target_connected = False
+    while loop_forever:
         remote = bt_create_socket()
         xbmc.connect(host, port)
         (remote,target_address) = get_remote_address(remote)

@@ -138,14 +138,8 @@ class Token:
   """Represents a token in a Pump source file."""
 
   def __init__(self, start=None, end=None, value=None, token_type=None):
-    if start is None:
-      self.start = Eof()
-    else:
-      self.start = start
-    if end is None:
-      self.end = Eof()
-    else:
-      self.end = end
+    self.start = Eof() if start is None else start
+    self.end = Eof() if end is None else end
     self.value = value
     self.token_type = token_type
 
@@ -366,8 +360,7 @@ def TokenizeLines(lines, pos):
       exp_token = ParseExpTokenInParens(lines, found.end)
       yield exp_token
       pos = exp_token.end
-    elif (found.token_type == ']]' or found.token_type == '$if' or
-          found.token_type == '$elif' or found.token_type == '$else'):
+    elif found.token_type in [']]', '$if', '$elif', '$else']:
       if prev_token_rstripped:
         yield prev_token_rstripped
       yield found
@@ -383,8 +376,7 @@ def Tokenize(s):
   """A generator that yields the tokens in the given string."""
   if s != '':
     lines = s.splitlines(True)
-    for token in TokenizeLines(lines, Cursor(0, 0)):
-      yield token
+    yield from TokenizeLines(lines, Cursor(0, 0))
 
 
 class CodeNode:
@@ -441,9 +433,8 @@ class ExpNode:
 
 
 def PopFront(a_list):
-  head = a_list[0]
   a_list[:1] = []
-  return head
+  return a_list[0]
 
 
 def PushFront(a_list, elem):
@@ -577,8 +568,7 @@ def ParseCodeNode(tokens):
 def ParseToAST(pump_src_text):
   """Convert the given Pump source text into an AST."""
   tokens = list(Tokenize(pump_src_text))
-  code_node = ParseCodeNode(tokens)
-  return code_node
+  return ParseCodeNode(tokens)
 
 
 class Env:

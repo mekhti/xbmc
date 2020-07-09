@@ -14,12 +14,12 @@ def get_params():
                         params=params[0:len(params)-2]
                 pairsofparams=cleanedparams.split('&')
                 param={}
-                for i in range(len(pairsofparams)):
+                for pairsofparam in pairsofparams:
                         splitparams={}
-                        splitparams=pairsofparams[i].split('=')
+                        splitparams = pairsofparam.split('=')
                         if (len(splitparams))==2:
                                 param[splitparams[0]]=splitparams[1]
-                                
+
         return param
 
 

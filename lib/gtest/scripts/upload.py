@@ -580,7 +580,7 @@ def RunShell(command, silent_ok=False, universal_newlines=True,
                                          universal_newlines)
   if retcode:
     ErrorExit("Got error status from %s:\n%s" % (command, data))
-  if not silent_ok and not data:
+  if not (silent_ok or data):
     ErrorExit("No output from %s" % command)
   return data
 
@@ -1132,7 +1132,7 @@ class MercurialVCS(VersionControlSystem):
       # Fetch again without converting newlines
       base_content = RunShell(["hg", "cat", "-r", self.base_rev, oldrelpath],
         silent_ok=True, universal_newlines=False)
-    if not is_binary or not self.IsImage(relpath):
+    if not (is_binary and self.IsImage(relpath)):
       new_content = None
     return base_content, new_content, is_binary, status
 
